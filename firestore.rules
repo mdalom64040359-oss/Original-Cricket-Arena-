@@ -1,0 +1,219 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Global default-deny safety net
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() >= 1 && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function isOwner(userId) {
+      return isSignedIn() && isValidId(userId) && request.auth.uid == userId;
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    function isBoundedStringList(arr, maxLen) {
+      return arr is list
+        && arr.size() <= maxLen
+        && (arr.size() == 0 || (arr[0] is string && arr[0].size() <= 128));
+    }
+
+    function isValidNotificationSettings(ns) {
+      return ns is map
+        && ns.keys().hasAll([
+          'favTeams',
+          'favPlayers',
+          'favLeagues',
+          'matchReminders',
+          'matchResults',
+          'browserNotifications'
+        ])
+        && ns.keys().hasOnly([
+          'favTeams',
+          'favPlayers',
+          'favLeagues',
+          'matchReminders',
+          'matchResults',
+          'browserNotifications'
+        ])
+        && ns.favTeams is bool
+        && ns.favPlayers is bool
+        && ns.favLeagues is bool
+        && ns.matchReminders is bool
+        && ns.matchResults is bool
+        && ns.browserNotifications is bool;
+    }
+
+    function isValidPrivacySettings(ps) {
+      return ps is map
+        && ps.keys().hasAll([
+          'profileVisibility',
+          'hideEmailOnScorecards',
+          'shareScorerNameLocally',
+          'confirmBeforeBackupExport',
+          'clearCacheOnLogout'
+        ])
+        && ps.keys().hasOnly([
+          'profileVisibility',
+          'hideEmailOnScorecards',
+          'shareScorerNameLocally',
+          'confirmBeforeBackupExport',
+          'clearCacheOnLogout'
+        ])
+        && ps.profileVisibility == 'only-me'
+        && ps.hideEmailOnScorecards is bool
+        && ps.shareScorerNameLocally is bool
+        && ps.confirmBeforeBackupExport is bool
+        && ps.clearCacheOnLogout is bool;
+    }
+
+    function isValidUserAccount(data, userId) {
+      return data.keys().hasAll([
+          'uid',
+          'displayName',
+          'email',
+          'photoDataUrl',
+          'clubName',
+          'city',
+          'country',
+          'bio',
+          'phone',
+          'language',
+          'defaultFormat',
+          'defaultOvers',
+          'soundEffects',
+          'compactScoreboard',
+          'autoSync',
+          'favouriteTeamIds',
+          'favouritePlayerIds',
+          'favouriteLeagues',
+          'favouriteMatchIds',
+          'notificationSettings',
+          'privacySettings',
+          'createdAt',
+          'updatedAt'
+        ])
+        && data.keys().hasOnly([
+          'uid',
+          'displayName',
+          'email',
+          'photoDataUrl',
+          'clubName',
+          'city',
+          'country',
+          'bio',
+          'phone',
+          'language',
+          'defaultFormat',
+          'defaultOvers',
+          'soundEffects',
+          'compactScoreboard',
+          'autoSync',
+          'favouriteTeamIds',
+          'favouritePlayerIds',
+          'favouriteLeagues',
+          'favouriteMatchIds',
+          'notificationSettings',
+          'privacySettings',
+          'createdAt',
+          'updatedAt'
+        ])
+        && data.uid is string
+        && data.uid == request.auth.uid
+        && data.uid == userId
+        && data.displayName is string
+        && data.displayName.size() >= 1
+        && data.displayName.size() <= 80
+        && data.email is string
+        && data.email.size() <= 160
+        && data.photoDataUrl is string
+        && data.photoDataUrl.size() <= 140000
+        && data.clubName is string
+        && data.clubName.size() <= 100
+        && data.city is string
+        && data.city.size() <= 80
+        && data.country is string
+        && data.country.size() <= 80
+        && data.bio is string
+        && data.bio.size() <= 300
+        && data.phone is string
+        && data.phone.size() <= 30
+        && data.language in ['en', 'bn']
+        && data.defaultFormat in ['T10', 'T20', 'ODI', 'TEST', 'CUSTOM']
+        && data.defaultOvers is int
+        && data.defaultOvers >= 1
+        && data.defaultOvers <= 450
+        && data.soundEffects is bool
+        && data.compactScoreboard is bool
+        && data.autoSync is bool
+        && isBoundedStringList(data.favouriteTeamIds, 100)
+        && isBoundedStringList(data.favouritePlayerIds, 100)
+        && isBoundedStringList(data.favouriteLeagues, 100)
+        && isBoundedStringList(data.favouriteMatchIds, 100)
+        && isValidNotificationSettings(data.notificationSettings)
+        && isValidPrivacySettings(data.privacySettings)
+        && data.createdAt is timestamp
+        && data.updatedAt is timestamp;
+    }
+
+    // Connection health check endpoint (requires authentication, no PII)
+    match /test/connection {
+      allow get: if isSignedIn();
+      allow list, write: if false;
+    }
+
+    // Strictly isolated personal user document (owner-only get/create/update/delete, zero cross-user listing)
+    match /users/{userId} {
+      allow get: if isOwner(userId);
+      allow list: if false;
+
+      allow create: if isOwner(userId)
+        && isValidUserAccount(incoming(), userId)
+        && incoming().createdAt == request.time
+        && incoming().updatedAt == request.time;
+
+      allow update: if isOwner(userId)
+        && isValidUserAccount(incoming(), userId)
+        && incoming().uid == existing().uid
+        && incoming().createdAt == existing().createdAt
+        && incoming().updatedAt == request.time
+        && (
+          incoming().diff(existing()).affectedKeys().hasOnly([
+            'displayName', 'email', 'photoDataUrl', 'clubName', 'city', 'country', 'bio', 'phone', 'updatedAt'
+          ]) ||
+          incoming().diff(existing()).affectedKeys().hasOnly([
+            'language', 'defaultFormat', 'defaultOvers', 'soundEffects', 'compactScoreboard', 'autoSync', 'updatedAt'
+          ]) ||
+          incoming().diff(existing()).affectedKeys().hasOnly([
+            'favouriteTeamIds', 'favouritePlayerIds', 'favouriteLeagues', 'favouriteMatchIds', 'updatedAt'
+          ]) ||
+          incoming().diff(existing()).affectedKeys().hasOnly([
+            'notificationSettings', 'privacySettings', 'updatedAt'
+          ]) ||
+          incoming().diff(existing()).affectedKeys().hasOnly([
+            'displayName', 'email', 'photoDataUrl', 'clubName', 'city', 'country', 'bio', 'phone',
+            'language', 'defaultFormat', 'defaultOvers', 'soundEffects', 'compactScoreboard', 'autoSync',
+            'favouriteTeamIds', 'favouritePlayerIds', 'favouriteLeagues', 'favouriteMatchIds',
+            'notificationSettings', 'privacySettings', 'updatedAt'
+          ])
+        );
+
+      allow delete: if isOwner(userId);
+    }
+  }
+}

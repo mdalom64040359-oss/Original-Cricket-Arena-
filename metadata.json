@@ -1,0 +1,6 @@
+{
+  "name": "Cricket Arena",
+  "description": "Score cricket matches ball-by-ball offline, manage teams and 50+ team tournaments, and track NRR and player stats on Android and web.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

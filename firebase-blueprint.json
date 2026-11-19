@@ -1,0 +1,143 @@
+{
+  "entities": {
+    "UserAccount": {
+      "title": "UserAccount",
+      "description": "Private personal profile, preferences, favourites, notification settings, and privacy controls owned exclusively by a single authenticated Cricket Arena user.",
+      "type": "object",
+      "properties": {
+        "uid": {
+          "type": "string",
+          "description": "Immutable Firebase Auth UID matching the document ID.",
+          "minLength": 1,
+          "maxLength": 128,
+          "pattern": "^[a-zA-Z0-9_\\-]+$"
+        },
+        "displayName": {
+          "type": "string",
+          "description": "User full display name.",
+          "minLength": 1,
+          "maxLength": 80
+        },
+        "email": {
+          "type": "string",
+          "description": "Account email address (private to owner).",
+          "maxLength": 160
+        },
+        "photoDataUrl": {
+          "type": "string",
+          "description": "Compressed profile avatar data URL or empty string.",
+          "maxLength": 140000
+        },
+        "clubName": {
+          "type": "string",
+          "description": "Associated club or team name.",
+          "maxLength": 100
+        },
+        "city": {
+          "type": "string",
+          "description": "User city or district.",
+          "maxLength": 80
+        },
+        "country": {
+          "type": "string",
+          "description": "User country.",
+          "maxLength": 80
+        },
+        "bio": {
+          "type": "string",
+          "description": "Short cricket bio or preferred playing role.",
+          "maxLength": 300
+        },
+        "phone": {
+          "type": "string",
+          "description": "Optional private contact number.",
+          "maxLength": 30
+        },
+        "language": {
+          "type": "string",
+          "description": "UI language preference.",
+          "enum": ["en", "bn"]
+        },
+        "defaultFormat": {
+          "type": "string",
+          "description": "Preferred cricket match format.",
+          "enum": ["T10", "T20", "ODI", "TEST", "CUSTOM"]
+        },
+        "defaultOvers": {
+          "type": "integer",
+          "description": "Default overs per innings."
+        },
+        "soundEffects": {
+          "type": "boolean",
+          "description": "Scoring tap feedback setting."
+        },
+        "compactScoreboard": {
+          "type": "boolean",
+          "description": "Compact live scoreboard display setting."
+        },
+        "autoSync": {
+          "type": "boolean",
+          "description": "Automatically sync personal changes when internet reconnects."
+        },
+        "favouriteTeamIds": {
+          "type": "array",
+          "description": "Bounded list of user favourite team IDs."
+        },
+        "favouritePlayerIds": {
+          "type": "array",
+          "description": "Bounded list of user favourite player IDs."
+        },
+        "favouriteLeagues": {
+          "type": "array",
+          "description": "Bounded list of user favourite league or tournament names/IDs."
+        },
+        "favouriteMatchIds": {
+          "type": "array",
+          "description": "Bounded list of user favourite match IDs."
+        },
+        "notificationSettings": {
+          "type": "object",
+          "description": "Personal match notification preferences."
+        },
+        "privacySettings": {
+          "type": "object",
+          "description": "Personal privacy controls."
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Server timestamp of account creation (immutable)."
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Server timestamp of latest update."
+        }
+      },
+      "required": [
+        "uid",
+        "displayName",
+        "email",
+        "language",
+        "defaultFormat",
+        "defaultOvers",
+        "favouriteTeamIds",
+        "favouritePlayerIds",
+        "favouriteLeagues",
+        "favouriteMatchIds",
+        "notificationSettings",
+        "privacySettings",
+        "createdAt",
+        "updatedAt"
+      ]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": {
+        "$ref": "#/entities/UserAccount"
+      },
+      "description": "Strictly isolated personal user profile, preferences, favourites, notifications, and privacy settings. Readable and writable exclusively by request.auth.uid == userId."
+    }
+  }
+}

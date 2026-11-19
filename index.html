@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <title>Cricket Arena — Match Scoring &amp; Tournament Management</title>
+    <meta
+      name="description"
+      content="Score cricket matches ball-by-ball offline, manage teams and 50+ team tournaments, and track NRR and player stats on Android and web."
+    />
+    <meta property="og:site_name" content="Cricket Arena" />
+    <meta property="og:title" content="Cricket Arena — Match Scoring &amp; Tournament Management" />
+    <meta
+      property="og:description"
+      content="Score cricket matches ball-by-ball offline, manage teams and 50+ team tournaments, and track NRR and player stats on Android and web."
+    />
+    <meta property="og:type" content="website" />
+    <meta property="og:image" content="/pwa-512x512.png" />
+    <meta property="og:image:alt" content="Cricket Arena crest with cricket stumps and green cricket ball" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Cricket Arena — Match Scoring &amp; Tournament Management" />
+    <meta
+      name="twitter:description"
+      content="Score cricket matches ball-by-ball offline, manage teams and 50+ team tournaments, and track NRR and player stats on Android and web."
+    />
+    <meta name="twitter:image" content="/pwa-512x512.png" />
+    <meta name="theme-color" content="#0B3B24" />
+    <meta name="color-scheme" content="dark" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="Cricket Arena" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+    <link rel="icon" type="image/svg+xml" href="/icon.svg" />
+    <link rel="icon" type="image/png" sizes="192x192" href="/pwa-192x192.png" />
+    <link rel="icon" type="image/png" sizes="512x512" href="/pwa-512x512.png" />
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "WebApplication",
+        "name": "Cricket Arena",
+        "description": "Score cricket matches ball-by-ball offline, manage teams and 50+ team tournaments, and track NRR and player stats on Android and web.",
+        "applicationCategory": "SportsApplication",
+        "operatingSystem": "Android, iOS, Windows, macOS, Linux",
+        "browserRequirements": "Requires a modern browser with IndexedDB and Service Worker support",
+        "offers": {
+          "@type": "Offer",
+          "price": "0",
+          "priceCurrency": "USD"
+        }
+      }
+    </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500;700&family=Outfit:wght@500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+  <body class="bg-[#070A08] text-white antialiased selection:bg-[#16A34A] selection:text-white">
+    <div id="root">
+      <div
+        role="status"
+        aria-label="Loading Cricket Arena"
+        style="min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;background:#070A08;color:#fff;font-family:system-ui,-apple-system,sans-serif;padding:24px;text-align:center;"
+      >
+        <img
+          src="/icon.svg"
+          alt="Cricket Arena"
+          width="76"
+          height="76"
+          style="border-radius:18px;margin-bottom:16px;"
+        />
+        <div style="font-size:20px;font-weight:700;letter-spacing:-0.02em;">Cricket Arena</div>
+        <div style="font-size:13px;color:#9AC2AA;margin-top:6px;">
+          Offline-First Scoring &amp; Tournament Hub
+        </div>
+      </div>
+    </div>
+    <noscript>
+      <div style="padding:24px;text-align:center;background:#070A08;color:#fff;font-family:system-ui,sans-serif;">
+        Cricket Arena requires JavaScript enabled to run offline scoring, tournaments, and player statistics.
+      </div>
+    </noscript>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
